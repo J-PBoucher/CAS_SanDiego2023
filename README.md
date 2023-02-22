@@ -1,7 +1,6 @@
 # Présentation à la conférence de la CAS sur la tarification, mars 2023
 
-# xaringan_template_cara
-Une coquille de présentation xaringan pour la Chaire Co-operators en analyse des risques actuariels
+(Une coquille de présentation xaringan pour la Chaire Co-operators en analyse des risques actuariels)
 
 1) Downloader le repo sur votre ordinateur
 2) Ouvrir le projet R (fichier .Rproj) dans RStudio
