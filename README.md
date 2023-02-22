@@ -1,3 +1,5 @@
+# Présentation à la conférence de la CAS sur la tarification, mars 2023
+
 # xaringan_template_cara
 Une coquille de présentation xaringan pour la Chaire Co-operators en analyse des risques actuariels
 
@@ -7,4 +9,4 @@ Une coquille de présentation xaringan pour la Chaire Co-operators en analyse de
 4) Ouvrir le fichier template.Rmd
 5) Dans « Addins », sélectionner « Infinite Moon Reader » et aller dans le Viewer pour voir les slides. Si « Infinite Moon Reader » n’est pas dans les Addins, repartir une nouvelle session R (Session -> Restart R).
 
-Pour voir les diapositives: https://francisduval.github.io/xaringan_template_cara
+Pour voir les diapositives: https://j-pboucher.github.io/CAS_SanDiego2023/#1
