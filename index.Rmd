@@ -66,17 +66,17 @@ J.-P. Boucher (2022). Bonus-Malus Scale Models: Creating Artificial Past Claims 
 
 # Introduction 
 
-## Ratemaking with Cross-Section Data  
+## Part I - Ratemaking with Cross-Section Data  
 - Basic Count Distributions;
 - Credibility Models and Predictive Ratemaking;
 - Bonus-Malus Scales Models.
 
-## Ratemaking with Panel Data  
+## Part II - Ratemaking with Panel Data  
 - Families of Count Distributions;
 - Observed Predictive Premiums;
 - Bonus-Malus Scales Models Revisited.
 
-## Actual Challenges
+## Part III - Actual Challenges
 - Entry levels and new insureds;
 - Penalties and *a priori* risks.
 
@@ -101,13 +101,26 @@ J.-P. Boucher (2022). Bonus-Malus Scale Models: Creating Artificial Past Claims 
 
 class: inverse
 
-# Part I: Ratemaking with cross-section data
+## .rougeb[Part I - Ratemaking with Cross-Section Data]    
 
-## i) Basic count distributions
+- Basic count distributions  
+- Credibility Models and Predictive Ratemaking  
+- Bonus-Malus Scales Models  
+
+## Part II - Ratemaking with Panel Data  
+
+- Families of Count Distributions  
+- Observed Predictive Premiums  
+- Bonus-Malus Scales Models Revisited
+
+## Part III - Actual Challenges
+
+- Entry levels and new insureds  
+- Penalties and *a priori* risks
 
 ---
 
-# Classic insurance database (cross-section data)
+# Classic insurance database 
 
 ```{r, echo=FALSE, warning=FALSE}
 tempo <- df2[sample(1:nrow(df2)), 1:24]
@@ -116,31 +129,7 @@ knitr::kable(head(tempo), format = "html", table.attr = "style='width:95%;'") %>
 
 ---
 
-# Available covariates
-
-Many fictional covariates are available in the dataframe.  
-
-For illustration, we will however only focus on 4 (fictional) covariates to model the number of claims:
-
-```{r, echo=FALSE, cache=FALSE, warning=FALSE}
-test <- data.frame(colnames(df2[,c(18,14,12,20)]))
-list <- c(18,14,12,20)
-test$value <- NA
-for(i in 1:4){
-  num <- list[i]
-  crossdata <- df2[order(df2[,num]),]
-  test[i,2] <- paste(c(unique(df2[,num])))
-}
-test$value <- sub('c','',test$value)
-
-colnames(test)[1] <- 'Column'
-colnames(test)[2] <- 'Values'
-knitr::kable(test, format = "html", row.names = F, table.attr = "style='width:95%;'") 
-```
-
----
-
-# Summary of the data (claims frequency)
+# Summary of the dataset 
 
 ## Basic statistics
 
@@ -163,8 +152,8 @@ colnames(res)[5] <- '% of exposition'
 
 knitr::kable(res, format = "html", align = "ccccc",  digits = c(0,0,0, 0,0), table.attr = "style='width:95%;'", format.args = list(big.mark = ",")) 
 
-mean <- mean(crossdata$NbClaims)
-variance <- sd(crossdata$NbClaims)^2
+mean <- mean(df2$NbClaims)
+variance <- sd(df2$NbClaims)^2
 
 test <- data.frame(c(mean, variance))
 
@@ -175,25 +164,27 @@ rownames(test)[2] <- 'Variance'
 knitr::kable(test, format = "html", digits = c(3), table.attr = "style='width:95%;'") 
 ```
 
-
 ---
 
+# Available covariates
 
-# Ratemaking
+Many fictional covariates are available in the dataframe. For illustration, we will however only focus on 4 (fictional) covariates to model the number of claims:
 
-## Premium calculation
+```{r, echo=FALSE, cache=FALSE, warning=FALSE}
+test <- data.frame(colnames(df2[,c(18,14,12,20)]))
+list <- c(18,14,12,20)
+test$value <- NA
+for(i in 1:4){
+  num <- list[i]
+  crossdata <- df2[order(df2[,num]),]
+  test[i,2] <- paste(c(unique(crossdata[,num])))
+}
+test$value <- sub('c','',test$value)
 
-For a specific insured $i$, our purpose is to model: 
-
-- The number of claims $N_i$, for $i=1, \ldots, m$ (a.k.a. frequency);
-- The severity of claims $j$, $X_{i,j}$, for $j=1, \ldots, N_i$, and $i=1, \ldots, m$ (a.k.a. severity);
-- The total cost $S_{i}$, for $i=1, \ldots, m$.
-
-We will usually suppose that the pure premium of each component if computed using the expected value.  
-
-## Risk segmentation
-
-With many covariates available, the premium of each insured could also be affected by its risk characteristics.
+colnames(test)[1] <- 'Column'
+colnames(test)[2] <- 'Values'
+knitr::kable(test, format = "html", row.names = F, table.attr = "style='width:95%;'") 
+```
 
 ---
 
@@ -208,16 +199,17 @@ With many covariates available, the premium of each insured could also be affect
 - Neural Networks;  
 - etc.  
 
-## Literature review
+## Literature review from actuarial sciences
 
 - Denuit, M., Hainaut, D. & Trufin, J. (2019). *Effective statistical learning methods for actuaries I: GLMs and Extensions*, Springer Nature.
 - Denuit, M., Hainaut, D. & Trufin, J. (2019). *Effective statistical learning methods for actuaries II: Tree-Based Methods and Extensions*, Springer Nature.
 - Denuit, M., Hainaut, D. & Trufin, J. (2019). *Effective statistical learning methods for actuaries III: Neural Networks and Extensions*, Springer Nature.
 - Wüthrich, M. V., & Merz, M. (2023). *Statistical foundations of actuarial learning and its applications*. Springer Nature.
+- etc.
 
 ---
 
-# *A priori* ratemaking for claims frequency
+# Prior ratemaking
 
 ## Poisson distribution
 
@@ -238,15 +230,6 @@ To correct the equidispersion of the Poisson or other problems, the most popular
 - Zero-Inflated distributions.
 
 ---
-
-class: inverse
-
-# Part I: Ratemaking with cross-section data
-
-## ii) Credibility models and predictive Ratemaking
-
----
-
 
 # Predictive ratemaking
 
@@ -427,15 +410,6 @@ However, even if the Poisson-gamma model is theoretically correct, and even stud
 - The value of $\sum_{t=1}^{T-1} \lambda_{i,t}$ depend on the estimated values of $\beta$, and should then be computed each year.  That means that insurers should keep all past covariates $\boldsymbol{X}_{i,t}$, from $t=1, \ldots, T$ of all their insureds.  For new insureds, this is even more complicated.
 
 ---
-
-class: inverse
-
-# Part I: Ratemaking with cross-section data
-
-## iii) Bonus-Malus scales models
-
----
-
 
 # Bonus-malus scales
 
@@ -712,7 +686,7 @@ $$E[N_{i,T}|\ell_{i,T}] = \lambda_{i,T} \times E[\Theta|\ell_{i,T}] = \lambda_{i
 
 ---
 
-## Computation of relativities
+# Computation of relativities
 
 More precisely, it can be shown that BMS relativities are computed using a simple bayesian approach, with:
 
@@ -771,9 +745,22 @@ knitr::include_graphics("images/Lemaire.png")
 
 class: inverse
 
-# Part II: Ratemaking with longitudinal data
+## Part I - Ratemaking with Cross-Section Data     
 
-## i) Families of count distributions
+- Basic count distributions  
+- Credibility Models and Predictive Ratemaking  
+- Bonus-Malus Scales Models  
+
+## .rougeb[Part II - Ratemaking with Panel Data]  
+
+- Families of Count Distributions  
+- Observed Predictive Premiums  
+- Bonus-Malus Scales Models Revisited
+
+## Part III - Actual Challenges
+
+- Entry levels and new insureds  
+- Penalties and *a priori* risks
 
 ---
 
@@ -833,16 +820,6 @@ As before, by knowing the distribution of the random effects $\Theta$, the Bonus
 
 ---
 
-class: inverse
-
-# Part II: Ratemaking with longitudinal data
-
-## ii) Observed predicted premiums
-
----
-
-
-
 # Predictive distribution
 
 Even if the situation is similar, cross-section data and panel data models are not the same. 
@@ -888,14 +865,6 @@ ggplot(somm1, aes(as.factor(contract.no), as.factor(past.nbclaim), fill= as.nume
   xlab("Contract nb.") + ylab("Nb. of past claims")+
   theme(legend.position = 'none')
 ```
-
----
-
-class: inverse
-
-# Part II: Ratemaking with longitudinal data
-
-## iii) Bonus-Malus scales revisited
 
 ---
 
@@ -1374,7 +1343,7 @@ It is important to understand that for each combinaison of the structural parame
 
 ---
 
-# Impact : example
+# Impact: example
 
 ## Choice of structural parameters 
 
@@ -1388,7 +1357,7 @@ g3b
 
 ---
 
-# Impact : example
+# Impact: example
 
 ## Choice of structural parameters 
 
@@ -1624,13 +1593,27 @@ knitr::include_graphics("images/graph_uni.png")
 knitr::include_graphics("images/graph_uni2.png")
 ```
 
+
 ---
 
 class: inverse
 
-# Part 3:  Actual challenges
+## Part I - Ratemaking with Cross-Section Data     
 
-## i) Entry levels and new insureds
+- Basic count distributions  
+- Credibility Models and Predictive Ratemaking  
+- Bonus-Malus Scales Models  
+
+## Part II - Ratemaking with Panel Data  
+
+- Families of Count Distributions  
+- Observed Predictive Premiums  
+- Bonus-Malus Scales Models Revisited
+
+## .rougeb[Part III - Actual Challenges]
+
+- Entry levels and new insureds  
+- Penalties and *a priori* risks
 
 ---
 
@@ -1687,14 +1670,6 @@ In the actuarial literature, two methods have been proposed to generate an artif
 
 1- We can suppose that each unobserved year of experience would be considered a year without claims, simply because is the most probable outcome. This assumption simplifies greatly the computation and the estimation of the BMS.  
 2- Another method is to suppose that all unobserved years of experience involve an average expected number of claims $\tilde{\mu}$.  That would mean that a corrected version of $n_{i, \bullet}$ and $\kappa_{i, \bullet}$ for each insured for their artificial claim history.
-
----
-
-class: inverse
-
-# Part 3:  Actual challenges
-
-## ii) Penalties and *a priori* risks
 
 ---
 
@@ -1766,15 +1741,10 @@ knitr::include_graphics("images/partition.png")
 
 ---
 
-class: inverse
 
 # Conclusion
 
----
-
-# Summary
-
-- Bonus-Malus Scales models are already in use;  
+- Bonus-Malus Scales models are already in use in many countries;  
 
 - Because of the way datasets are now constructed, the current way to calibrate them has to be changed;  
 
@@ -1782,7 +1752,7 @@ class: inverse
 
 - Despite its simplicity, it has been shown to out-perform many more "advanced" models;  
 
-- Iterative GLM approaches can be used to estimate basic BMS models;  
+- Iterative GLM approaches can be used to estimate BMS models.  
 
 ---
 
@@ -1790,19 +1760,12 @@ class: inverse
 
 ## Website of the research Chair
 
-You can check the website of the Co-operators Chair in Actuarial Risk Analysis for publications, fundings, etc.
-
-<center>
-https://chairecara.uqam.ca/en/
-</center>
+You can check the <a href="https://chairecara.uqam.ca/en/">website</a> of the *Co-operators Chair in Actuarial Risk Analysis* (CARA) for publications, PhD fundings, etc.
 
 ## Github
 
-This presentation (including the R scripts) and the dataframe *df2.Rda* can be found on my *github*:
+This presentation (including the R scripts and the dataframe *df2.Rda*) can be found on my <a href="https://github.com/J-PBoucher/CAS_SanDiego2023">github page</a>.
 
-<center>
-www.github...
-</center>
 
 ## Thanks
 
