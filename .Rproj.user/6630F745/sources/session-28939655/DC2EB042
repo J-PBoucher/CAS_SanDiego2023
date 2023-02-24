@@ -3,7 +3,7 @@
     "path": "~/GitHub/CAS_SanDiego2023/theme_cara.css",
     "project_path": "theme_cara.css",
     "type": "css",
-    "hash": "2745696970",
+    "hash": "2777503813",
     "contents": "",
     "dirty": false,
     "created": 1677245773869.0,
@@ -12,15 +12,15 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "25,24",
+        "cursorPosition": "43,2",
         "scrollLine": "12"
     },
     "folds": "",
-    "lastKnownWriteTime": 1677248483,
+    "lastKnownWriteTime": 1677250922,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1677248483755,
+    "last_content_update": 1677250922743,
     "read_only": false,
     "read_only_alternatives": []
 }

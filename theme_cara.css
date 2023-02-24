@@ -41,7 +41,7 @@
   --secondary: #00adee;
   --white: #FFFFFF;
   --black: #000000;
-}
+} 
 
 html {
   font-size: var(--base-font-size);
