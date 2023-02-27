@@ -191,22 +191,19 @@ knitr::kable(test, format = "html", row.names = F, table.attr = "style='width:95
 
 # Basis of covariates selection
 
-## Techniques
-
-- Minimum-bias techniques;  
-- Generalized linear models;
-- GLM-net (Ridge and Lasso);  
+## Possible techniques
+- Minimum-bias techniques (...old);  
+- Generalized linear models and GLM-net (Ridge and Lasso);  
 - Random Forests;  
 - Neural Networks;  
 - etc.  
 
-## Literature review from actuarial sciences
-
+## Literature review (from actuarial sciences):
 - Denuit, M., Hainaut, D. & Trufin, J. (2019). *Effective statistical learning methods for actuaries I: GLMs and Extensions*, Springer Nature.
 - Denuit, M., Hainaut, D. & Trufin, J. (2019). *Effective statistical learning methods for actuaries II: Tree-Based Methods and Extensions*, Springer Nature.
 - Denuit, M., Hainaut, D. & Trufin, J. (2019). *Effective statistical learning methods for actuaries III: Neural Networks and Extensions*, Springer Nature.
 - Wüthrich, M. V., & Merz, M. (2023). *Statistical foundations of actuarial learning and its applications*. Springer Nature.
-- etc.
+
 
 ---
 
@@ -345,9 +342,9 @@ knitr::kable(table, format = "html", align = "ccccc",  digits = c(4,4), table.at
 
 # Prediction quality on the test set
 
-Even if it is not the objective of this presentation, we can compare the fit and the prediction quality of the Poisson and the Negative Binomial 2.  For the training set, the loglikelihood is used and a logarithmic score is used on the test set:
+Even if it is not the objective of this presentation, we can compare the fit and the prediction quality of the Poisson and the Negative Binomial 2.  For the training set, the loglikelihood is used and a logarithmic score ($LS$) is used on the test set:
 
-$$- \sum_{i=1}^m \log(\Pr(N_i=n_i|\boldsymbol{X}_i))$$
+$$LS = - \sum_{i=1}^m \log(\Pr(N_i=n_i|\boldsymbol{X}_i))$$
 
 ## Computation
 
@@ -666,6 +663,76 @@ knitr::kable(table2, format = "html", align = "ccccc", row.names=F, table.attr =
 
 ]
 
+
+---
+
+# BMS1
+
+
+$$\Pr[\Theta=\theta_1| L = \ell] = \frac{\Pr[L= \ell| \theta_1] \Pr[\Theta=\theta_1]}
+{\Pr[L= \ell| \theta_1] \Pr[\Theta=\theta_1] + \Pr[L= \ell| \theta_2] \Pr[\Theta=\theta_2]}$$
+
+
+Niveau  - $\Pr[\Theta=\theta_1| L= \ell]$ - $\Pr[\Theta=\theta_2| L= \ell]$
+0 - 53.12 - 46.79 
+1 - 26.48 - 73.52 
+2 - 10.44 - 89.56 
+
+Remarques:
+
+- Bon pouvoir de discrimination dans les niveaux élevés: au niveau 2, 9 fois plus de chances d'être un mauvais conducteur qu'un bon;
+
+- Au plus bas niveau, où se concentre près de 90\% des assurés, l'échelle discrime mal...
+
+---
+
+# BMS1
+
+Interprétation:
+
+A priori, il y a 50 pourcents de bons et 50 pourcents de mauvais conducteurs.  Ainsi (en supposant des sinistres de 1 dollar), la prime a priori pourrait se calculer comme:
+
+\begin{align*}
+P_{\text{a priori}} =& E[E[N|\theta]]\\
+=& \Pr[\Theta = \theta_1] \lambda \theta_1 +
+\Pr[\Theta = \theta_2] \lambda \theta_2  \\
+=& 0.50 * 0.05 + 0.50 * 0.15 = 0.10 \\
+\end{align*}
+
+---
+
+# BMS1
+
+A posteriori, cette prime passe à 
+
+\begin{align*}
+P_{\text{a posteriori}} =& E[N|L = \ell]\\
+=& E[E[N|\theta,| L = \ell]]\\
+=& \Pr[\Theta = \theta_1| L = \ell] \lambda \theta_1 +
+\Pr[\Theta = \theta_2 | L = \ell] \lambda \theta_2  \\
+=& \lambda (  \theta_1 \Pr[\Theta = \theta_1| L = \ell]  +
+ \theta_2 \Pr[\Theta = \theta_2 | L = \ell] ) \\
+=& \lambda E[\Theta| L = \ell] 
+\end{align*}
+
+---
+
+# BMS1
+
+Cet exemple permet de comprendre ce qu'est un système bonus-malus.  Au lieu d'exprimer la mise-à-jour de $\theta$ de manière complètement numérique, elle est établie selon les structures du bonus-malus.
+
+Dans l'exemple numérique, nous aurions:
+
+\begin{align*}
+E[\Theta| L = 0] =& 0.9679 \\
+E[\Theta| L = 1] =& 1.2352 \\
+E[\Theta| L = 2] =& 1.3956  
+\end{align*}
+
+Ce qui correspondrait aux valeurs de ce système bonus malus:
+
+- Le premier niveau donne une ristourne de 3.2\%
+- Les autres niveaux, des pénalités de 23.5\% et 40\%.
 
 ---
 
@@ -1480,6 +1547,7 @@ db.test <- data %>% filter(Type=='TEST')
 score.nbclaim <- as.formula(NbClaims ~ car_color + need_glasses + territory + language + food + BMS.level + offset(log(risk_expo)))
 Poisson.BMS   <- glm(score.nbclaim, family=poisson(link=log), data=db.train)
 NB2.BMS <- glm.nb(score.nbclaim, data=db.train) 
+
 ```
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
@@ -1501,14 +1569,123 @@ rownames(table)[10] <- '$\\gamma_2$'
 knitr::kable(table, format = "html", align = "ccccc",  digits = c(4,4), table.attr = "style='width:95%;'", format.args = list(big.mark = ",")) 
 ```
 
+---
+
+# Analyzing the model 
+
+## Expected number of claims
+
+The mean of the BMS model can then be expressed as:
+
+\begin{align*}
+\lambda_{i,t} =& \exp\left(X_{i,t}' \beta^* + \gamma_1 \ell_{i,t} \right) 
+= \exp\left(X_{i,t}' \beta^* + \gamma_1 \ell_{i,t} \right) 
+= \Pi_{i,t} \times r(\ell_{i,t})
+\end{align*}
+
+where: 
+- $\Pi_{i,t} = \exp\left(X_{i,t}' \beta^*\right)$ is the base premium that depends on covariates for the contract $t$ of insured $i$;
+- $r(\ell_{i,t}) = \exp\left(\gamma_1 \ell_{i,t} \right)$ is the BMS relativity that depends on the BMS level $\ell_{i,t}$ the contract $t$ of insured $i$.
+
+## Prior and posterior ratemaking
+
+As opposed to classic BMS calibration, all parameters of the mean are estimated simulatenously:
+
+i) the $\beta$ from the covariates (for the $\Pi_{i,t}$ component),  
+ii) the $\gamma_1$ for the predictive ratemaking (for the $r(\ell_{i,t})$ component).  
+
 
 ---
 
-# Results
+# Graph of BMS relativities 
 
-## Training set 
 
-The following table shows the log-likelihood obtained for each mode. A correction, such as the AIC/BIC,  must be applied for each model because they do not have he same number of parameters).
+```{r, echo = F, warning=FALSE, dpi=300, fig.width=13, fig.height=5.5, fig.align = "center"}
+
+BMS.s    <- 104
+BMS.min  <- 96
+BMS.ell0 <- 100
+BMS.psi  <- 2
+
+min1 <- BMS.min
+max1 <- BMS.s
+
+#coef <- as.numeric(Poisson.BMS$coefficients[9])
+
+coef <- 0.1180
+
+nb <- floor(max1-min1 + 1)
+rel.mat <- matrix(ncol=2, nrow=nb)
+for(i in 1:nb){
+  BMS.level <- as.numeric(BMS.min - 1 + i)
+  rel.BMS <- exp((BMS.level-100)*coef)
+  rel.mat[i, 1] <- BMS.level
+  rel.mat[i, 2] <- rel.BMS
+}
+rel.mat.SI <- data.frame(rel.mat)
+colnames(rel.mat.SI) <- c("BMS.level", "rel")
+
+## calculs pour le graph ###
+floor_dec <- function(x, level=1) round(x - 5*10^(-level-1), level)
+ceiling_dec <- function(x, level=1) round(x + 5*10^(-level-1), level)
+
+y.max <- max(rel.mat.SI$rel)
+y.maxc <- ceiling_dec(y.max, 1)
+y.min <- min(rel.mat.SI$rel)
+y.minf <- floor_dec(y.min, 1)
+
+x.loc.psi <- BMS.psi/2 + 100
+y.loc.psi <- y.min + 0.06
+y.psi <- exp(BMS.psi*coef)
+y.kappa <- exp(-coef)
+up <- 0.02
+
+
+ggplot(rel.mat.SI) +
+  geom_line(aes(x=BMS.level, y = rel, colour="Relativity")) + 
+  ## maximum 
+  #  geom_segment(x = BMS.s, xend=BMS.s, y = 0, yend=y.max, colour = "black", size = 0.3) +
+  geom_segment(x = 0, xend=BMS.s, y = y.max , yend=y.max, colour = "blue", linetype="dashed",  size = 0.3) +
+  ## minimum 
+  #  geom_segment(x = BMS.min, xend=BMS.min, y = 0, yend=y.min, colour = "black", size = 0.3) +
+  geom_segment(x = 0, xend=BMS.min, y = y.min , yend=y.min, colour = "blue", linetype="dashed", size = 0.3) +
+  ## relativite 1.00
+  geom_segment(x = 100, xend=100, y = 0, yend=1, colour = "black", linetype="dashed",size = 0.3) +
+  geom_segment(x = 0, xend=100, y = 1, yend=1, colour = "black", linetype="dashed",size = 0.3) +
+  geom_point(aes(x=100, y=1), colour="black") + 
+  ## Claim + Psi
+  annotate("text", x = x.loc.psi, y = y.loc.psi, label = '+Psi', color="red", parse = TRUE, size=5) +
+  geom_segment(aes(x = 100, y = y.min + up, xend = 100+BMS.psi, yend = y.min + up), color="red", arrow = arrow(length = unit(0.5, "cm"))) +
+  geom_segment(x = 100 + BMS.psi, xend=100+ BMS.psi, y = 0, yend=y.psi, colour = "red", linetype="dashed",size = 0.3) +
+  geom_segment(x = 0, xend=100 + BMS.psi, y = y.psi, yend=y.psi, colour = "red", linetype="dashed",size = 0.3) +
+  geom_point(aes(x=100+BMS.psi, y=y.psi), colour="red") + 
+  ## No Claim - 1
+  annotate("text", x = 99.4, y = y.loc.psi, label = '-1', color="darkgreen", parse = TRUE, size=5) +
+  geom_segment(aes(x = 100, y = y.min + up, xend = 99, yend = y.min + up), color="darkgreen", arrow = arrow(length = unit(0.5, "cm"))) +
+  geom_segment(x = 99, xend=99, y = 0, yend=y.kappa, colour = "darkgreen", linetype="dashed",size = 0.3) +
+  geom_segment(x = 0, xend=99, y = y.kappa, yend=y.kappa, colour = "darkgreen", linetype="dashed",size = 0.3) +
+  geom_point(aes(x=99, y=y.kappa), colour="darkgreen") + 
+  
+  scale_colour_manual("", values = c("BMS Relativity"="blue"))+
+  ylab("Relativity") + xlab("BMS Level") +
+  scale_x_continuous(breaks=c(seq(BMS.min,BMS.s,by=1), BMS.s)) +
+  scale_y_continuous(breaks=c(seq(y.minf,y.maxc,by=0.1))) +
+  theme(legend.position="none") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"),
+        text = element_text(size = 15))
+
+
+```
+
+
+---
+
+# Fitting and predictive quality
+
+## Log-likelihood (Training set) 
+
+A correction, such as the AIC/BIC, must be applied for each model because they do not have he same number of parameters.
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 ll.Poisson    = logLik(Poisson)
@@ -1531,7 +1708,7 @@ knitr::kable(table, format = "html", align = "ccccc",  digits = c(4,4), table.at
 
 ```
 
-## Test set
+## Logarithmic Score (Test set)
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 data <- set.BMS_levels(ell.max=104, ell.min=96, Psi=2, df2)
@@ -1582,18 +1759,65 @@ knitr::kable(table, format = "html", align = "ccccc",  digits = c(4,4), table.at
 
 # Distribution over the BMS levels (training dataset)
 
-```{r, echo = F, out.width = "70%", fig.align = "center"}
-knitr::include_graphics("images/graph_uni.png")
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+data <- set.BMS_levels(ell.max=104, ell.min=96, Psi=2, df2)
+db.train <- data %>% filter(Type=='TRAIN')
+db.test <- data %>% filter(Type=='TEST')
+
+db.train$pred <- predict(Poisson.BMS, newdata=db.train, type="response") 
+db.test$pred <- predict(Poisson.BMS, newdata=db.test, type="response") 
+
+train <- db.train %>%
+  group_by(BMS.level) %>%
+  summarize(tot.claims = mean(NbClaims),
+            tot.pred = mean(pred)) 
+
+test <- db.test %>%
+  group_by(BMS.level) %>%
+  summarize(tot.claims = mean(NbClaims),
+            tot.pred = mean(pred)) 
+
+gr1 <- ggplot(data=train) + 
+  geom_line(aes(x=BMS.level, y=tot.claims, color="Observed")) +
+  geom_point(aes(x=BMS.level, y=tot.claims, color="Observed")) +
+  geom_line(aes(x=BMS.level, y=tot.pred, color="Fitted")) +
+  geom_point(aes(x=BMS.level, y=tot.pred, color="Fitted")) +
+  ylab("Average Frequency") + xlab("BMS Level") +
+  scale_colour_manual("", 
+                      breaks = c("Observed", "Fitted"),
+                      values = c("red", "blue")) +
+  theme_bw()
+
+gr2 <- ggplot(data=test) + 
+  geom_line(aes(x=BMS.level, y=tot.claims, color="Observed")) +
+  geom_point(aes(x=BMS.level, y=tot.claims, color="Observed")) +
+  geom_line(aes(x=BMS.level, y=tot.pred, color="Predicted")) +
+  geom_point(aes(x=BMS.level, y=tot.pred, color="Predicted")) +
+  ylab("Average Frequency") + xlab("BMS Level") +
+  scale_colour_manual("", 
+                      breaks = c("Observed", "Predicted"),
+                      values = c("red", "blue")) +
+  theme_bw()
+
+
+```
+
+
+```{r, echo = F, warning=FALSE, dpi=300, fig.width=13, fig.height=5.5, fig.align = "center"}
+
+gr1
+
 ```
 
 ---
 
 # Distribution over the BMS levels (test dataset)
 
-```{r, echo = F, out.width = "70%", fig.align = "center"}
-knitr::include_graphics("images/graph_uni2.png")
-```
+```{r, echo = F, warning=FALSE, dpi=300, fig.width=13, fig.height=5.5, fig.align = "center"}
 
+gr2
+
+```
 
 ---
 
@@ -1669,8 +1893,19 @@ knitr::include_graphics("images/PastInfo.png")
 
 In the actuarial literature, two methods have been proposed to generate an artificial past claims history:
 
-1- We can suppose that each unobserved year of experience would be considered a year without claims, simply because is the most probable outcome. This assumption simplifies greatly the computation and the estimation of the BMS.  
-2- Another method is to suppose that all unobserved years of experience involve an average expected number of claims $\tilde{\mu}$.  That would mean that a corrected version of $n_{i, \bullet}$ and $\kappa_{i, \bullet}$ for each insured for their artificial claim history.
+### 1- Average outcome
+
+The first method is to suppose that all unobserved years of experience of insured $i$ involve an average expected number of claims $\tilde{\mu}_i$.  
+
+This implies a corrected version of $n_{i, \bullet}$ and $\kappa_{i, \bullet}$ for each insured, and consequently a new value of $\ell_{i,t}$ for all $t$.
+
+### 2- Most probable outcome
+
+The second method is to suppose that each unobserved year of experience would be considered a year without claims, simply because is the most probable outcome. 
+
+This assumption simplifies greatly the computation and the estimation of the BMS because it means using the first method with $\tilde{\mu}_i = 0$ for all insureds.  
+
+
 
 ---
 
@@ -1691,7 +1926,7 @@ J.-P. Boucher (2022). Multiple Bonus-Malus Scale Models for Insureds of Differen
 
 Remember the predictive expected premium for the Poisson-gamma model:
 
-$$E[N_{i,T}|n_{i,1},..., n_{i,T-1}, \boldsymbol{X}_{i,T}] = \lambda_{i,T} \frac{\alpha + \sum_t^{T-1} n_{i,t}}{\alpha + \sum_t^{T-1} \lambda_{i,t}}$$
+$$E[N_{i,T}|n_{i,1},..., n_{i,T-1}, \boldsymbol{X}_{i,T}] = \lambda_{i,T} \frac{\alpha + \sum_{t=1}^{T-1} n_{i,t}}{\alpha + \sum_{t=1}^{T-1} \lambda_{i,t}}$$
 
 
 or the weights in the Buhlmann-Straub model, where the random variables were normalised by the *a priori* risk: $Y_{i,t} = \frac{N_{i,t}}{W_{i,t}}$.
@@ -1747,26 +1982,60 @@ knitr::include_graphics("images/partition.png")
 
 - Bonus-Malus Scales models are already in use in many countries;  
 
-- Because of the way datasets are now constructed, the current way to calibrate them has to be changed;  
+- Because of how insurance datasets are now constructed, the current way to calibrate BMS has to be changed;  
+
+- We show that iterative GLM approaches can be used to estimate BMS models.  
 
 - BMS are really flexible and allows penalty structures that cannot be supposed easily by other models and distributions;  
 
-- Despite its simplicity, it has been shown to out-perform many more "advanced" models;  
-
-- Iterative GLM approaches can be used to estimate BMS models.  
+- Despite its simplicity, it has been shown to out-perform many more *advanced* models;  
 
 ---
 
-# Source, data and references
+background-image: url("images/Chaire.png")
+background-position: 80% 50%
+background-size: 40%
 
-## Website of the research Chair
+#  Website of the research Chair 
 
-You can check the <a href="https://chairecara.uqam.ca/en/">website</a> of the *Co-operators Chair in Actuarial Risk Analysis* (CARA) for publications, PhD fundings, etc.
+.pull-left[
+You can check the <a href="https://chairecara.uqam.ca/en/">website</a> of the *Co-operators Chair in Actuarial Risk Analysis* (CARA) for:
+- recent publications, 
+- research projects;
+- MSc and PhD fundings, 
+- etc.:
 
-## Github
+<center><a href="https://chairecara.uqam.ca/en/">https://chairecara.uqam.ca/en/</a></center>
+]
 
-This presentation (including the R scripts and the dataframe *df2.Rda*) can be found on my <a href="https://github.com/J-PBoucher/CAS_SanDiego2023">github page</a>.
+---
 
+background-image: url("images/GitHub.png")
+background-position: 80% 50%
+background-size: 40%
+
+#  Github 
+
+.pull-left[
+
+On my <a href="https://github.com/J-PBoucher/CAS_SanDiego2023">github page</a>, you can find:
+- this presentation; 
+- all R script codes used;
+- the dataframe *df2.Rda*.
+
+<center><a href="https://github.com/J-PBoucher">https://github.com/J-PBoucher</a></center>
+]
+
+---
+
+# Other
+
+## References
+
+- J.-P. Boucher (2022). Bonus-Malus Scale Models: Creating Artificial Past Claims History. *Annals of Actuarial Science*, 1-27. 
+- J.-P. Boucher (2022). Multiple Bonus-Malus Scale Models for Insureds of Different Sizes. *Risks*, 10(8), 152. 
+- J.-P. Boucher & M. Pigeon (2019), A Claim Score for Dynamic Claim Counts Modelling, *Canadian Institute of Actuaries*.
+- J.-P. Boucher & R. Inoussa (2014). A posteriori ratemaking with panel data. *ASTIN Bulletin: The Journal of the IAA*, 44(3), 587-612.
 
 ## Thanks
 
