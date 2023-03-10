@@ -16,6 +16,13 @@ output:
       countIncrementalSlides: false
 ---
 
+```{r include=FALSE, eval=FALSE}
+
+xaringan_to_pdf('index.html', NULL, 1, FALSE)
+
+```
+
+
 ```{r include = F}
 library(tidyverse)
 library(xaringan)
@@ -30,6 +37,7 @@ library(MASS)
 library(gamlss)
 
 load('Data/df2.Rda')
+
 
 ```
 
@@ -49,23 +57,51 @@ background-position: 98% 98%, center
 .sous-sous-titre-page-titre[.mon-style-bleu[] Prof. Jean-Philippe Boucher, ACIA, Ph.D. <br /> .mon-style-bleu[] Co-operators Chair in Actuarial Risk Analysis <br /> Université du Québec à Montréal (UQAM) <br /> .mon-style-bleu[] March 15th, 2023]
 
 
+
 ---
 
-background-image: url("images/Paper1.png")
+background-image: url("images/GitHub.png")
 background-position: 80% 50%
 background-size: 40%
 
-# Reference 
+#  Scripts and dataframe available on Github 
 
 .pull-left[
-### The first part of the presentation is based on Sections 1-3 of: 
 
-J.-P. Boucher (2022). Bonus-Malus Scale Models: Creating Artificial Past Claims History. *Annals of Actuarial Science*, 1-27. ]
+On my <a href="https://github.com/J-PBoucher/CAS_SanDiego2023">github page</a>, you can find:
+- this presentation; 
+- all R script codes used;
+- the dataframe *df2.Rda*.
 
+<center><a href="https://github.com/J-PBoucher">https://github.com/J-PBoucher</a></center>
+]
 
 ---
 
-# Introduction 
+# R Preamble (to replicate the results)
+
+```{r include = T, eval=F}
+library(tidyverse)
+library(xaringan)
+library(xaringanthemer)
+library(kableExtra)
+library(DT)
+library(dplyr)
+library(ggplot2)
+library(kableExtra)
+library(scales)
+library(MASS)
+library(gamlss)
+
+load('Data/df2.Rda')
+
+
+```
+
+---
+
+
+# Summary of the presentation
 
 ## Part I - Ratemaking with Cross-Section Data  
 - Basic Count Distributions;
@@ -80,6 +116,20 @@ J.-P. Boucher (2022). Bonus-Malus Scale Models: Creating Artificial Past Claims 
 ## Part III - Actual Challenges
 - Entry levels and new insureds;
 - Penalties and *a priori* risks.
+
+---
+
+background-image: url("images/Paper1.png")
+background-position: 80% 50%
+background-size: 40%
+
+# Reference 
+
+.pull-left[
+### The first part of the presentation is based on Sections 1-3 of: 
+
+J.-P. Boucher (2022). Bonus-Malus Scale Models: Creating Artificial Past Claims History. *Annals of Actuarial Science*, 1-27. ]
+
 
 ---
 
@@ -199,10 +249,11 @@ knitr::kable(test, format = "html", row.names = F, table.attr = "style='width:95
 - etc.  
 
 ## Literature review (from actuarial sciences):
-- Denuit, M., Hainaut, D. & Trufin, J. (2019). *Effective statistical learning methods for actuaries I: GLMs and Extensions*, Springer Nature.
-- Denuit, M., Hainaut, D. & Trufin, J. (2019). *Effective statistical learning methods for actuaries II: Tree-Based Methods and Extensions*, Springer Nature.
-- Denuit, M., Hainaut, D. & Trufin, J. (2019). *Effective statistical learning methods for actuaries III: Neural Networks and Extensions*, Springer Nature.
-- Wüthrich, M. V., & Merz, M. (2023). *Statistical foundations of actuarial learning and its applications*. Springer Nature.
+- Denuit, M., Hainaut, D. & Trufin, J. (2019), Springer Nature:  
+  - *Effective statistical learning methods for actuaries I: GLMs and Extensions*,  
+  - *Effective statistical learning methods for actuaries II: Tree-Based Methods and Extensions*,  
+  - *Effective statistical learning methods for actuaries III: Neural Networks and Extensions*,  
+- Wüthrich, M. V., & Merz, M. (2023). *Statistical foundations of actuarial learning and its applications*. 
 
 
 ---
@@ -416,7 +467,7 @@ To compute predictive premiums, actuaries have created **Bonus-Malus Scales** (B
 ### Structure of the BMS (example with 6 levels)
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
-table<- data.frame(cbind(c('6', '5', '4', '3', '2', '1'), c(1.41, 1.23, 1.14, 1.08, 1.02, 0.90)))
+table<- data.frame(cbind(c('6', '5', '4', '3', '2', '1'), c(1.296, 1.197, 1.141, 1.017, 0.986, 0.879)))
 
 colnames(table)[1] <- 'Level'
 colnames(table)[2] <- 'Relativities'
@@ -493,22 +544,38 @@ knitr::kable(table, format = "html", align = "ccccc", row.names=F, table.attr = 
 
 # Calibration of the BMS
 
-## Risk characteristics
+## Covariates and risk characteristics
 
-We can use the dataset of this example.  We suppose an insured with some specific risk characteristics.  For example, the insured might drive a black car, be an English speaker, be vegan, etc.  
+We can use the dataset of this example.  We suppose an insured with some specific risk characteristics, for example, the insured might drive a black car, be an English speaker, be vegan, etc.  
 
 We will suppose a Poisson distribution, this insured has the following *a priori* premium: $\lambda = 0.2532$.
 
 ## Heterogeneity
 
-Now, suppose that two insureds have these characteristics, but the first insured has an heterogeneity factor $\theta_1 = 0.75$, while the other has an heterogeneity factor of $\theta_2 = 1.50$.
+For simplicity, we will suppose two kinds of drivers, meaning the following distribution for $\Theta$:
 
-Respectively, the number of claims for each insured will be Poisson distributed with mean:
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+s0 <- c(0.667, 0.333)
+s1 <- c(0.750, 1.500)
+s2 <- c(0.1899, 0.3798)
 
-$$\lambda \theta_1 = 0.1899 \ \ \text{ and } \ \ \lambda \theta_2 = 0.3798.$$
+table<- data.frame(cbind(s0, s1, s2)) 
+table[,1] <- percent(table[,1], accuracy = 0.1)
+
+rownames(table)[1] <- 'Good driver'
+rownames(table)[2] <- 'Bad driver'
+
+
+knitr::kable(table, format = "html", col.names = c("Proportion", "$\\theta$", "$\\lambda \\theta$"), 
+             align = "ccccc", row.names = T,  digits = c(3,3, 4), table.attr = "style='width:95%;'") 
+
+
+```
+
+
 ---
 
-# Transition matrix for each insured
+# Transition matrix for each type of drivers
 
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
@@ -574,7 +641,7 @@ With the mean parameter of the Poisson distribution, it becomes possible to comp
 
 .pull-left[
 
-### Insured 1
+### Good driver (0.1899)
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 knitr::kable(table1, format = "html", align = "ccccc", row.names=F, table.attr = "style='width:95%;'", format.args = list(big.mark = ",")) 
@@ -585,7 +652,7 @@ knitr::kable(table1, format = "html", align = "ccccc", row.names=F, table.attr =
 
 .pull-right[
 
-### Insured 2
+### Bad driver (0.3798)
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 knitr::kable(table2, format = "html", align = "ccccc", row.names=F, table.attr = "style='width:95%;'", format.args = list(big.mark = ",")) 
@@ -596,9 +663,9 @@ knitr::kable(table2, format = "html", align = "ccccc", row.names=F, table.attr =
 
 ---
 
-# Stationnary matrix for each insured
+# Stationnary matrix for each type of drivers
 
-The long-term distribution of insured within the levels of the BMS can also be computed.
+The long-term distribution of insured within the levels of the BMS can also be computed, where the initial BMS level at time $t=1$ does not have any impact.
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -643,7 +710,7 @@ colnames(table2)[6] <- ''
 
 .pull-left[
 
-### Insured 1
+### Good driver (0.1899)
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 knitr::kable(table1, format = "html", align = "ccccc", row.names=F, table.attr = "style='width:95%;'", format.args = list(big.mark = ",")) 
@@ -654,7 +721,7 @@ knitr::kable(table1, format = "html", align = "ccccc", row.names=F, table.attr =
 
 .pull-right[
 
-### Insured 2
+### Bad driver (0.3798)
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 knitr::kable(table2, format = "html", align = "ccccc", row.names=F, table.attr = "style='width:95%;'", format.args = list(big.mark = ",")) 
@@ -666,104 +733,78 @@ knitr::kable(table2, format = "html", align = "ccccc", row.names=F, table.attr =
 
 ---
 
-# BMS1
+# BMS Relativities
 
+## Posterior distribution
 
-$$\Pr[\Theta=\theta_1| L = \ell] = \frac{\Pr[L= \ell| \theta_1] \Pr[\Theta=\theta_1]}
-{\Pr[L= \ell| \theta_1] \Pr[\Theta=\theta_1] + \Pr[L= \ell| \theta_2] \Pr[\Theta=\theta_2]}$$
-
-
-Niveau  - $\Pr[\Theta=\theta_1| L= \ell]$ - $\Pr[\Theta=\theta_2| L= \ell]$
-0 - 53.12 - 46.79 
-1 - 26.48 - 73.52 
-2 - 10.44 - 89.56 
-
-Remarques:
-
-- Bon pouvoir de discrimination dans les niveaux élevés: au niveau 2, 9 fois plus de chances d'être un mauvais conducteur qu'un bon;
-
-- Au plus bas niveau, où se concentre près de 90\% des assurés, l'échelle discrime mal...
-
----
-
-# BMS1
-
-Interprétation:
-
-A priori, il y a 50 pourcents de bons et 50 pourcents de mauvais conducteurs.  Ainsi (en supposant des sinistres de 1 dollar), la prime a priori pourrait se calculer comme:
+Knowing the *a priori* distribution of the heterogeneity $\Theta$, and the stationary distribution within the levels of the BMS for all types of drivers, we can compute the posterior distribution of $\Theta$, conditional on the level $\ell$:
 
 \begin{align*}
-P_{\text{a priori}} =& E[E[N|\theta]]\\
-=& \Pr[\Theta = \theta_1] \lambda \theta_1 +
-\Pr[\Theta = \theta_2] \lambda \theta_2  \\
-=& 0.50 * 0.05 + 0.50 * 0.15 = 0.10 \\
+\Pr[\text{Good driver}| L = \ell] &= \frac{\Pr[L= \ell|\text{Good driver}] \Pr[\text{Good driver}]}
+{\Pr[L= \ell| \text{Good driver}] \Pr[\text{Good driver}] + \Pr[L= \ell| \text{Bad driver}] \Pr[\text{Bad driver}]}\\
+&= 1 - \Pr[\text{Bad driver}| L = \ell]
 \end{align*}
 
+## Conditional expectation
+
+With the posterior distribution of $\Theta$, the BMS relativity of each level can be computed with the conditional expectation:
+ 
+$$r_{\ell} = E[\Theta| L = \ell] = 0.75 \times \Pr[\text{Good driver}| L = \ell] + 1.50 \times \Pr[\text{Bad driver}| L = \ell] $$
 ---
 
-# BMS1
+# Results
 
-A posteriori, cette prime passe à 
+Simple calculations with our numerical example lead to:
 
-\begin{align*}
-P_{\text{a posteriori}} =& E[N|L = \ell]\\
-=& E[E[N|\theta,| L = \ell]]\\
-=& \Pr[\Theta = \theta_1| L = \ell] \lambda \theta_1 +
-\Pr[\Theta = \theta_2 | L = \ell] \lambda \theta_2  \\
-=& \lambda (  \theta_1 \Pr[\Theta = \theta_1| L = \ell]  +
- \theta_2 \Pr[\Theta = \theta_2 | L = \ell] ) \\
-=& \lambda E[\Theta| L = \ell] 
-\end{align*}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
----
+prob1 <- matrix(nrow=1, ncol=ncol(table1))
+for(i in 1:ncol(table1)){
+  p1 <- matrix1[1,i]*0.667
+  p2 <- matrix2[1,i]*0.333
+  prob1[i] <- p1/(p1+p2)
+}
 
-# BMS1
+mean <- prob1*0.75 + (1-prob1)*1.5
+table1 <- data.frame(rbind(prob1, 1-prob1, mean))
 
-Cet exemple permet de comprendre ce qu'est un système bonus-malus.  Au lieu d'exprimer la mise-à-jour de $\theta$ de manière complètement numérique, elle est établie selon les structures du bonus-malus.
+table1[,1] <- percent(table1[,1], accuracy = 0.1)
+table1[,2] <- percent(table1[,2], accuracy = 0.1)
+table1[,3] <- percent(table1[,3], accuracy = 0.1)
+table1[,4] <- percent(table1[,4], accuracy = 0.1)
+table1[,5] <- percent(table1[,5], accuracy = 0.1)
+table1[,6] <- percent(table1[,6], accuracy = 0.1)
 
-Dans l'exemple numérique, nous aurions:
+colnames(table1)[1] <- '1'
+colnames(table1)[2] <- '2'
+colnames(table1)[3] <- '3'
+colnames(table1)[4] <- '4'
+colnames(table1)[5] <- '5'
+colnames(table1)[6] <- '6'
 
-\begin{align*}
-E[\Theta| L = 0] =& 0.9679 \\
-E[\Theta| L = 1] =& 1.2352 \\
-E[\Theta| L = 2] =& 1.3956  
-\end{align*}
+rownames(table1)[1] <- 'Good driver'
+rownames(table1)[2] <- 'Bad driver'
+rownames(table1)[3] <- 'BMS relativity'
 
-Ce qui correspondrait aux valeurs de ce système bonus malus:
+knitr::kable(table1, format = "html", align = "cccccc", row.names=T, table.attr = "style='width:95%;'", format.args = list(big.mark = ",")) %>%
+  add_header_above(c(" ", "BMS Level" = 6))
 
-- Le premier niveau donne une ristourne de 3.2\%
-- Les autres niveaux, des pénalités de 23.5\% et 40\%.
 
----
 
-# Analysis of the distribution
-
-## Stationnary distribution
-
-- The distribution of insureds in the BMS does not depend on the starting level;
-- More dangerous insureds have a higher probability of being in the top levels of the BMS;
-- Less dangerous insureds have a higher probability of being in the bottom levels of the BMS.
-
-## Distribution of the heterogeneity
-
-- The distribution of $\Theta$, conditionnally on the level $\ell$ of a BMS, can be found;
-- The conditional expected value of the heterogeneity, $E[\Theta|\ell]$, can also be computed;
-- A predictive premium, based on the level $\ell$ of the insured at time $T$ can be calculed:
-
-$$E[N_{i,T}|\ell_{i,T}] = \lambda_{i,T} \times E[\Theta|\ell_{i,T}] = \lambda_{i,T} \times r(\ell_{i,T})$$ 
+```
 
 ---
 
 # Computation of relativities
 
-More precisely, it can be shown that BMS relativities are computed using a simple bayesian approach, with:
+The results can be generalized with continuous heterogeneity, where it can be shown that BMS relativities are computed using:
 
 $$r_{\ell} = \frac{ \int_0^{\infty} \theta  \Pi_{\ell}(\lambda \theta) g(\theta) d\theta }
 {\int_0^{\infty} \Pi_{\ell}(\lambda \theta) g(\theta) d\theta} \ \ \  \text{, for } \ell = 1,...,\ell_{max}.$$
 
 where: 
 
-- $g(\theta)$ is the heterogeneity distribution;   
+- $g(\theta)$ is the prior heterogeneity distribution;   
 - $\Pi_{\ell}(\lambda \theta)$ is the $\ell$ line component of $\Pi(\lambda \theta)$, the stationary distribution of insured of mean $\lambda \theta$.
 
 ---
@@ -1049,7 +1090,7 @@ parm[11] <- NA
 MASS.parm <- c(nb2.MASS$coefficients, nb2.MASS$theta)
 table <- cbind(parm, MASS.parm)
 colnames(table)[1] <- 'Poisson'
-colnames(table)[2] <- 'NB2(MASS)'
+colnames(table)[2] <- 'NB2'
 rownames(table)[11] <- '$\\alpha$'
 knitr::kable(table, format = "html", align = "ccccc",  digits = c(4,4), table.attr = "style='width:95%;'", format.args = list(big.mark = ",")) 
 ```
@@ -2040,3 +2081,5 @@ On my <a href="https://github.com/J-PBoucher/CAS_SanDiego2023">github page</a>, 
 ## Thanks
 
 Finally, a special thank to my Ph.D. student **Francis Duval** who created this nice *xaringan* template with RMarkdown.
+
+

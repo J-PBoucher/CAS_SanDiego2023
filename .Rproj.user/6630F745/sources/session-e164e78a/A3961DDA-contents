@@ -1,0 +1,6 @@
+library(rsconnect)
+
+rsconnect::deployApp("D:/Jean_Philippe/Documents/UQAM/Recherches/Projets/En cours/2022-07 LBMB/LBMB")
+
+
+#https://www.shinyapps.io/admin/#/dashboard

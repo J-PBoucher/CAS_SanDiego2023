@@ -1,0 +1,5 @@
+"0","xaringan_to_pdf('index.html', NULL, 1, FALSE)
+"
+"2","Error in onRejected(reason) : code: -32000
+  message: Browser window not found
+"

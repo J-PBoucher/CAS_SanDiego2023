@@ -1,0 +1,49 @@
+
+Sys.setlocale("LC_ALL","C")
+
+library(shiny)
+library(ggplot2)
+library(dplyr)
+library(writexl)
+library(htmlTable)
+library(knitr)
+library(kableExtra)
+library(gridExtra)
+library(grid)
+library(reshape2)
+library(ggplot2)
+library(DT)
+library(tibble)
+library(data.table)
+library(shinydashboard)
+library(DT)
+
+source("Other.R")
+
+ui <-shinyUI(fluidPage(
+
+  titlePanel(title = span(img(src = "LBMB.jpg", height = 150), "Ligue de balle-molle de Beloeil - saison 2022")),
+
+  tags$style(HTML("
+      .tabbable > .nav > li > a                  {background-color: white;  color:black}
+      .tabbable > .nav > li > a[data-value='MLB'] {background-color: black;   color:white}
+      .tabbable > .nav > li > a[data-value='1 vs 1'] {background-color: black;  color:white}
+      .tabbable > .nav > li > a[data-value='Catchers'] {background-color: black; color:white}
+      .tabbable > .nav > li > a[data-value='Defense'] {background-color: black; color:white}
+      .tabbable > .nav > li > a[data-value='Lanceurs'] {background-color: black; color:white}
+      .tabbable > .nav > li > a[data-value='Frappeurs'] {background-color: black; color:white}
+      .tabbable > .nav > li > a[data-value='Classement'] {background-color: black; color:white}
+      .tabbable > .nav > li > a[data-value='A propos'] {background-color: gray; color:white}
+      .tabbable > .nav > li[class=active]    > a {background-color: red; color:white}
+  ")),
+  tabsetPanel(
+tabPanel("Classement", classement),
+tabPanel("Frappeurs", statf),
+tabPanel("Lanceurs", statp),
+tabPanel("Defense", statd),
+tabPanel("Catchers", statc),
+tabPanel("1 vs 1", comparaisons),
+tabPanel("MLB", mlb),
+tabPanel("A propos", ddatte)
+)
+))
