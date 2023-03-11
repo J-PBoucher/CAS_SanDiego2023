@@ -1,0 +1,2 @@
+"0","tempo <- df2[sample(1:nrow(df2)), 1:24]"
+"0","knitr::kable(head(tempo), format = ""html"", table.attr = ""style='width:95%;'"") %>% scroll_box(width = ""100%"")"

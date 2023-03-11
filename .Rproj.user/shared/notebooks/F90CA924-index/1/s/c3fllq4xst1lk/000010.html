@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<style>body{background-color:white;}</style>
+<script src="lib/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="lib/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="lib/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="lib/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="lib/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="lib/kePrint-0.0.1/kePrint.js"></script>
+<link href="lib/lightable-0.0.1/lightable.css" rel="stylesheet" />
+
+</head>
+<body>
+<div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:100%; "><table style='width:95%;'>
+ <thead>
+  <tr>
+   <th style="text-align:right;"> policy_no </th>
+   <th style="text-align:right;"> veh.num </th>
+   <th style="text-align:left;"> renewal_date </th>
+   <th style="text-align:left;"> start_date </th>
+   <th style="text-align:left;"> end_date </th>
+   <th style="text-align:right;"> risk_expo </th>
+   <th style="text-align:right;"> freq_payment </th>
+   <th style="text-align:right;"> year_veh </th>
+   <th style="text-align:left;"> sex </th>
+   <th style="text-align:right;"> year_birth </th>
+   <th style="text-align:right;"> year_licence </th>
+   <th style="text-align:left;"> language </th>
+   <th style="text-align:left;"> job_type </th>
+   <th style="text-align:left;"> territory </th>
+   <th style="text-align:left;"> use </th>
+   <th style="text-align:left;"> car_type </th>
+   <th style="text-align:left;"> car_make </th>
+   <th style="text-align:left;"> car_color </th>
+   <th style="text-align:left;"> need_glasses </th>
+   <th style="text-align:left;"> food </th>
+   <th style="text-align:left;"> hair_color </th>
+   <th style="text-align:left;"> Type </th>
+   <th style="text-align:right;"> NbClaims </th>
+   <th style="text-align:right;"> TotalCost </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 7302789 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 2017-04-24 </td>
+   <td style="text-align:left;"> 2016-04-24 </td>
+   <td style="text-align:left;"> 2017-04-23 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 2010 </td>
+   <td style="text-align:left;"> M </td>
+   <td style="text-align:right;"> 1949 </td>
+   <td style="text-align:right;"> 1982 </td>
+   <td style="text-align:left;"> English </td>
+   <td style="text-align:left;"> Engineer </td>
+   <td style="text-align:left;"> Urban </td>
+   <td style="text-align:left;"> Commercial </td>
+   <td style="text-align:left;"> Pickup </td>
+   <td style="text-align:left;"> FERRARI </td>
+   <td style="text-align:left;"> Red </td>
+   <td style="text-align:left;"> No </td>
+   <td style="text-align:left;"> Vegetarian </td>
+   <td style="text-align:left;"> Dark </td>
+   <td style="text-align:left;"> TRAIN </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.00 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 8815054 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 2017-01-04 </td>
+   <td style="text-align:left;"> 2016-01-04 </td>
+   <td style="text-align:left;"> 2017-01-03 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 12 </td>
+   <td style="text-align:right;"> 2008 </td>
+   <td style="text-align:left;"> M </td>
+   <td style="text-align:right;"> 1969 </td>
+   <td style="text-align:right;"> 1988 </td>
+   <td style="text-align:left;"> English </td>
+   <td style="text-align:left;"> Nurse </td>
+   <td style="text-align:left;"> Suburban </td>
+   <td style="text-align:left;"> Commute </td>
+   <td style="text-align:left;"> Pickup </td>
+   <td style="text-align:left;"> BMW </td>
+   <td style="text-align:left;"> Red </td>
+   <td style="text-align:left;"> No </td>
+   <td style="text-align:left;"> Vegetarian </td>
+   <td style="text-align:left;"> Blonde </td>
+   <td style="text-align:left;"> TRAIN </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.00 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 9139940 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 2016-04-27 </td>
+   <td style="text-align:left;"> 2015-04-27 </td>
+   <td style="text-align:left;"> 2016-04-26 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 12 </td>
+   <td style="text-align:right;"> 2013 </td>
+   <td style="text-align:left;"> M </td>
+   <td style="text-align:right;"> 1959 </td>
+   <td style="text-align:right;"> 1988 </td>
+   <td style="text-align:left;"> French </td>
+   <td style="text-align:left;"> Engineer </td>
+   <td style="text-align:left;"> Suburban </td>
+   <td style="text-align:left;"> Commute </td>
+   <td style="text-align:left;"> Minivan </td>
+   <td style="text-align:left;"> FERRARI </td>
+   <td style="text-align:left;"> Red </td>
+   <td style="text-align:left;"> Yes </td>
+   <td style="text-align:left;"> Vegetarian </td>
+   <td style="text-align:left;"> Red </td>
+   <td style="text-align:left;"> TRAIN </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 77.14 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 6872212 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 2017-09-20 </td>
+   <td style="text-align:left;"> 2016-09-20 </td>
+   <td style="text-align:left;"> 2017-09-19 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 12 </td>
+   <td style="text-align:right;"> 2011 </td>
+   <td style="text-align:left;"> F </td>
+   <td style="text-align:right;"> 1962 </td>
+   <td style="text-align:right;"> 1982 </td>
+   <td style="text-align:left;"> French </td>
+   <td style="text-align:left;"> Plumber </td>
+   <td style="text-align:left;"> Rural </td>
+   <td style="text-align:left;"> Commute </td>
+   <td style="text-align:left;"> Sedan </td>
+   <td style="text-align:left;"> FERRARI </td>
+   <td style="text-align:left;"> Other </td>
+   <td style="text-align:left;"> No </td>
+   <td style="text-align:left;"> Vegetarian </td>
+   <td style="text-align:left;"> Red </td>
+   <td style="text-align:left;"> TRAIN </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.00 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 6932771 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 2015-04-29 </td>
+   <td style="text-align:left;"> 2014-04-29 </td>
+   <td style="text-align:left;"> 2015-04-28 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 2011 </td>
+   <td style="text-align:left;"> M </td>
+   <td style="text-align:right;"> 1978 </td>
+   <td style="text-align:right;"> 1996 </td>
+   <td style="text-align:left;"> French </td>
+   <td style="text-align:left;"> Plumber </td>
+   <td style="text-align:left;"> Suburban </td>
+   <td style="text-align:left;"> Commute </td>
+   <td style="text-align:left;"> Pickup </td>
+   <td style="text-align:left;"> FERRARI </td>
+   <td style="text-align:left;"> Other </td>
+   <td style="text-align:left;"> No </td>
+   <td style="text-align:left;"> Vegetarian </td>
+   <td style="text-align:left;"> Dark </td>
+   <td style="text-align:left;"> TEST </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.00 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 6337325 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> 2011-12-27 </td>
+   <td style="text-align:left;"> 2010-12-27 </td>
+   <td style="text-align:left;"> 2011-12-26 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 2007 </td>
+   <td style="text-align:left;"> F </td>
+   <td style="text-align:right;"> 1969 </td>
+   <td style="text-align:right;"> 1991 </td>
+   <td style="text-align:left;"> English </td>
+   <td style="text-align:left;"> Lawyer </td>
+   <td style="text-align:left;"> Urban </td>
+   <td style="text-align:left;"> Commute </td>
+   <td style="text-align:left;"> Pickup </td>
+   <td style="text-align:left;"> VOLKSWAGEN </td>
+   <td style="text-align:left;"> Red </td>
+   <td style="text-align:left;"> No </td>
+   <td style="text-align:left;"> Vegetarian </td>
+   <td style="text-align:left;"> Blonde </td>
+   <td style="text-align:left;"> TEST </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 0.00 </td>
+  </tr>
+</tbody>
+</table></div> <script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [["$","$"]]}})</script><script async src="https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>

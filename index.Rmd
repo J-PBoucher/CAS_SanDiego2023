@@ -419,6 +419,8 @@ ll.NB2 <- logLik(nb2.MASS)
 
 ## Results
 
+A correction for the training dataset, such as the AIC/BIC, must be applied for each model because they do not have he same number of parameters.
+
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 table<- data.frame(cbind(c(ll.Poisson,ll.NB2), c(logs.Poisson,logs.NB2)))
 
@@ -437,16 +439,16 @@ knitr::kable(table, format = "html", align = "ccccc",  digits = c(4,4), table.at
 
 ## Distribution of the heterogeneity
 
-Based on the baysian model, by fitting a Negative Binomial distribution (NB2) on claim counts data, we know that the heterogeneity of our portfolio $\Theta$ is following a gamma( $\alpha = 1.6654$, $\tau = \alpha = 1.6654$).
+Based on the baysian model, by fitting a Negative Binomial distribution (NB2) on claim counts data, we know that the heterogeneity of our portfolio $\Theta$ is following a gamma( $\alpha = 2.1244$, $\tau = \alpha = 2.1244$).
 
 ## Predictive premiums
 
 The predictive premium of an insured with $n_{i, \bullet} = \sum_{t=1}^{T-1} n_{i,t}$ past claims, and 
 $\lambda_{i, \bullet} = \sum_{t=1}^{T-1} \lambda_{i,t}$ as the sum of past *a priori* premiums, is equal to:
 
-$$E[N_{i,T}|n_{i,1},..., n_{i,T-1}, \boldsymbol{X}_{i,T}] = \lambda_{i,T} \frac{\alpha + \sum_{t=1}^{T-1} n_{i,t}}{\alpha + \sum_{t=1}^{T-1} \lambda_{i,t}} = \lambda_{i,T} \frac{1.6654 + n_{i, \bullet}}{1.6654 +  \lambda_{i,\bullet}}$$ 
+$$E[N_{i,T}|n_{i,1},..., n_{i,T-1}, \boldsymbol{X}_{i,T}] = \lambda_{i,T} \frac{\alpha + \sum_{t=1}^{T-1} n_{i,t}}{\alpha + \sum_{t=1}^{T-1} \lambda_{i,t}} = \lambda_{i,T} \frac{2.1244 + n_{i, \bullet}}{2.1244 +  \lambda_{i,\bullet}}$$ 
 
-In STAM exam, we were able to analyse in details this equation.
+In the STAM exam, we were able to analyse in details this equation.
 
 ---
 
@@ -467,7 +469,7 @@ To compute predictive premiums, actuaries have created **Bonus-Malus Scales** (B
 ### Structure of the BMS (example with 6 levels)
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
-table<- data.frame(cbind(c('6', '5', '4', '3', '2', '1'), c(1.296, 1.197, 1.141, 1.017, 0.986, 0.879)))
+table<- data.frame(cbind(c('1', '2', '3', '4', '5', '6'), c(0.879, 0.986, 1.017, 1.141, 1.197, 1.296)))
 
 colnames(table)[1] <- 'Level'
 colnames(table)[2] <- 'Relativities'
@@ -883,19 +885,29 @@ knitr::kable(head(df2), format = "html", table.attr = "style='width:95%;'") %>% 
 
 ---
 
-# Claim count for panel data ##
+background-image: url("images/Verbeke.png")
+background-position: 80% 50%
+background-size: 20%
 
-## Families of models
+# Claim count for panel data 
 
-We have to suppose a form of dependance between all contracts of the same insured/vehicle. For count distributions, panel data modeling admits 3 families (see Molenberghs & Verbeke, 2005):
+.pull-left[
 
-- Transition models (for example: time series for count data);    
+### Families of models
+
+We have to suppose a form of dependance between all contracts of the same insured/vehicle. 
+
+For count distributions, panel data modeling admits 3 families (see Molenberghs & Verbeke, 2005):
+
+- Transition models (for example: Time series for count data);    
 - Marginal approach (for example: Generalized Estimating Equations - GEE);  
 - Conditional approach with random effects.
 
+]
+
 ---
 
-# Conditional approach
+# Conditional approach with random effects
 
 ## General form 
 
@@ -913,19 +925,130 @@ $$\Pr[N_{i,1}=n_{i,1},...,N_{i,T}=n_{i,T}] = \left(\prod_{t=1}^{T} \frac{(\lambd
 
 ---
 
+# R scripts: Multivariate Negative Binomial (MVNB)
+
+## Packages to use 
+
+To our knowledge, a R package to estimate the MVNB distribution does not exist. An old package *multinbmod* worked in the past.
+
+Instead, a simpler solution is to simply write down the log-likelihood of the MVNB in a function (here *max.loglike.MVNB*) and use the *optim* or the *optimx* solver:
+
+```{r, eval=FALSE}
+
+max.loglike.MVNB <- function(parm){
+  ...
+  return(loglike)
+}
+parm <- rep(0,9)
+optim.MVNB <- optim(par = parm, max.loglike.MVNB)
+```
+
+
+```{r include = F, cache=T}
+
+db.train <- df2 %>% filter(Type=='TRAIN')
+db.test <- df2 %>% filter(Type=='TEST')
+
+max.loglike.MVNB <- function(parm){
+  beta <- parm[1:8]
+  alpha <- 1/exp(parm[9])
+  
+  data$lambda <- data$risk_expo*exp(parm[1] + 
+                                 parm[2]* (data$car_color=="Red") +
+                                 parm[3]*(data$need_glasses=='Yes') +
+                                 parm[4]*(data$territory=='Suburban') +
+                                 parm[5]*(data$territory=='Urban') +
+                                 parm[6]*(data$language=='French') +
+                                 parm[7]*(data$food=='Vegan') +
+                                 parm[8]*(data$food=='Vegetarian') )
+  data <- data %>%
+    group_by(policy_no, veh.num) %>%
+    mutate(l.bullet = cumsum(lambda) - lambda,
+           nb.bullet = cumsum(NbClaims) - NbClaims)%>%
+    ungroup()
+  
+  data$tau.s = alpha + data$l.bullet
+  data$alpha.s = alpha + data$nb.bullet
+
+  ll <- lgamma(data$NbClaims + data$alpha.s) - lgamma(data$alpha.s) - lgamma(data$NbClaims+1) + 
+    data$alpha.s*log(data$tau.s) - data$alpha.s*log(data$lambda+data$tau.s) +
+    data$NbClaims*log(data$lambda) - data$NbClaims*log(data$lambda+data$tau.s)
+  return(-sum(ll))
+}
+
+data <- db.train
+parm <- c(Poisson$coefficients, -10)
+max.loglike.MVNB(parm)
+logLik(Poisson)
+
+optim.MVNB <- optim(par = parm, max.loglike.MVNB)
+
+```
+
+
+---
+
+# Results
+
+## Comparison
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+parm <- Poisson$coefficients
+MASS.parm <- c(nb2.MASS$coefficients, nb2.MASS$theta)
+MVNB.parm <- c(optim.MVNB$par[1:8], exp(-optim.MVNB$par[9]))
+parm[9] <- NA
+table <- cbind(parm, MASS.parm, MVNB.parm)
+colnames(table)[1] <- 'Poisson'
+colnames(table)[2] <- 'NB2'
+colnames(table)[3] <- 'MVNB'
+
+rownames(table)[9] <- "$\\alpha$"
+knitr::kable(table, format = "html", align = "ccccc",  digits = c(4,4,4), table.attr = "style='width:95%;'", format.args = list(big.mark = ",")) 
+
+```
+
+---
+
+# Comparison of models
+
+## Results
+
+A correction for the training dataset, such as the AIC/BIC, must be applied for each model because they do not have he same number of parameters.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
+data <- db.test
+parm <- optim.MVNB$par
+logs.MVNB <-  max.loglike.MVNB(parm)
+
+table<- data.frame(cbind(c(ll.Poisson,ll.NB2, -optim.MVNB$value), c(logs.Poisson,logs.NB2, logs.MVNB)))
+
+colnames(table)[1] <- 'Log-likelihood (Train)'
+colnames(table)[2] <- 'Logarithmic Score (Test)'
+rownames(table)[1] <- 'Poisson'
+rownames(table)[2] <- 'Negative Binomial 2'
+rownames(table)[3] <- 'MVNB'
+
+knitr::kable(table, format = "html", align = "ccccc",  digits = c(4,4), table.attr = "style='width:95%;'", format.args = list(big.mark = ",")) 
+
+```
+
+---
+
 # Posterior ratemaking
 
 As for cross-section data, we are interested to compute the predictive premium. The predictive premium of an insured with $\sum_{t=1}^{T-1} n_{i,t}$ past claims, and $\sum_{t=1}^{T-1} \lambda_{i,t}$ as the sum of past *a priori* premiums, is equal to:
 
 $$E[N_{i,T}|n_{i,1},..., n_{i,T-1}, \boldsymbol{X}_{i,T}] = \lambda_{i,T} \frac{\alpha + \sum_{t=1}^{T-1} n_{i,t}}{\alpha + \sum_{t=1}^{T-1} \lambda_{i,t}}.$$
 
-This result is similar to what we obtained for the predictive premium of a NB2 distribution.
+This result is similar to what we obtained for the predictive premium of a NB2 distribution but the estimated value of the 
+$\alpha$ is not the same ($\widehat{\beta}$ are also different).
 
 ## Same problems 
 
 For the same reasons why the NB2 was not used in practice (no weight in $\sum_{t=1}^{T-1} n_{i,t}$, and the need to use past $\lambda_{i,t}$, for example), another approach has to be used in practice.
 
-As before, by knowing the distribution of the random effects $\Theta$, the Bonus-Malus Scale models can be an interesting solution...
+As before, by knowing that the random effects $\Theta$ are gamma distributed, the Bonus-Malus Scale models can be an interesting solution...
 
 ---
 
@@ -1724,7 +1847,7 @@ ggplot(rel.mat.SI) +
 
 # Fitting and predictive quality
 
-## Log-likelihood (Training set) 
+### Log-likelihood (Training set) 
 
 A correction, such as the AIC/BIC, must be applied for each model because they do not have he same number of parameters.
 
@@ -1737,19 +1860,22 @@ ll.NB2    = logLik(NB2)
 ll.NB2.KN  = logLik(NB2.KN)
 ll.NB2.BMS = logLik(NB2.BMS)
 
-table<- data.frame(cbind(c(ll.Poisson,ll.NB2), c(ll.Poisson.KN,ll.NB2.KN), c(ll.Poisson.BMS,ll.NB2.BMS)))
+ll.MVNB <- -optim.MVNB$value
+  
+table<- data.frame(cbind(c(ll.Poisson,ll.NB2, ll.MVNB), c(ll.Poisson.KN,ll.NB2.KN, NA), c(ll.Poisson.BMS,ll.NB2.BMS, NA)))
 
 colnames(table)[1] <- 'Standard'
 colnames(table)[2] <- 'Kappa-N'
 colnames(table)[3] <- 'BMS'
 rownames(table)[1] <- 'Poisson'
 rownames(table)[2] <- 'Negative Binomial 2'
+rownames(table)[3] <- 'MVNB'
 
 knitr::kable(table, format = "html", align = "ccccc",  digits = c(4,4), table.attr = "style='width:95%;'", format.args = list(big.mark = ",")) 
 
 ```
 
-## Logarithmic Score (Test set)
+### Logarithmic Score (Test set)
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 data <- set.BMS_levels(ell.max=104, ell.min=96, Psi=2, df2)
@@ -1784,13 +1910,14 @@ test.NB2.BMS <- -sum(ll)
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
-table<- data.frame(cbind(c(test.Poisson,test.NB2), c(test.Poisson.KN,test.NB2.KN), c(test.Poisson.BMS,test.NB2.BMS)))
+table<- data.frame(cbind(c(test.Poisson,test.NB2, logs.MVNB), c(test.Poisson.KN,test.NB2.KN, NA), c(test.Poisson.BMS,test.NB2.BMS, NA)))
 
 colnames(table)[1] <- 'Standard'
 colnames(table)[2] <- 'Kappa-N'
 colnames(table)[3] <- 'BMS'
 rownames(table)[1] <- 'Poisson'
 rownames(table)[2] <- 'Negative Binomial 2'
+rownames(table)[3] <- 'MVNB'
 
 knitr::kable(table, format = "html", align = "ccccc",  digits = c(4,4), table.attr = "style='width:95%;'", format.args = list(big.mark = ",")) 
 
@@ -1963,7 +2090,7 @@ J.-P. Boucher (2022). Multiple Bonus-Malus Scale Models for Insureds of Differen
 
 ---
 
-# Size of each Farm
+# Size of each farm
 
 Remember the predictive expected premium for the Poisson-gamma model:
 

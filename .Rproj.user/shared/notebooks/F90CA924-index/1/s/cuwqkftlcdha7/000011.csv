@@ -1,4 +1,0 @@
-"0","xaringan_to_pdf('index.html', NULL, 1, FALSE)
-"
-"2","Error: Chromote: timed out waiting for response to command Target.createTarget
-"
