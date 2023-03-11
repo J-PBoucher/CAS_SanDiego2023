@@ -429,7 +429,7 @@ colnames(table)[2] <- 'Logarithmic Score (Test)'
 rownames(table)[1] <- 'Poisson'
 rownames(table)[2] <- 'Negative Binomial 2'
 
-knitr::kable(table, format = "html", align = "ccccc",  digits = c(4,4), table.attr = "style='width:95%;'", format.args = list(big.mark = ",")) 
+knitr::kable(table, format = "html", align = "ccccc",  digits = c(4,4), table.attr = "style='width:95%;'", format.args = list(big.mark = ",") ) 
 
 ```
 
@@ -456,9 +456,11 @@ In the STAM exam, we were able to analyse in details this equation.
 
 However, even if the Poisson-gamma model is theoretically correct, and even studied in the preliminary exams, this predictive rating approach is almost never used in practice:
 
-- There is not weight in $\sum_{t=1}^{T-1} n_{i,t}$.  That means that a claim from 10 or 20 years ago will have the same impact of the premium that an accident that was claimed last year;  
-
-- The value of $\sum_{t=1}^{T-1} \lambda_{i,t}$ depend on the estimated values of $\beta$, and should then be computed each year.  That means that insurers should keep all past covariates $\boldsymbol{X}_{i,t}$, from $t=1, \ldots, T$ of all their insureds.  For new insureds, this is even more complicated.
+- There is not weight in $\sum_{t=1}^{T-1} n_{i,t}$.  
+  + That means that a claim from 10 or 20 years ago will have the same impact of the premium that an accident that was claimed last year;  
+  
+- The value of $\sum_{t=1}^{T-1} \lambda_{i,t}$ depend on the estimated values of $\beta$, and should then be computed each year.  
+  + That means that insurers should keep all past covariates $\boldsymbol{X}_{i,t}$, from $t=1, \ldots, T$ of all their insureds.  For new insureds, this is even more complicated.
 
 ---
 
@@ -488,8 +490,7 @@ A BMS is defined by its number of levels and by its transition rules.  If we sup
 - The BMS level of an insured without claim will be lowered by 1 (-1);    
 - The BMS level of an insured will increase by the number of claims times 2 (+2).   
 
-We then can summarize the transition rule system as:
-
+This is called a BMS -1/+2, and its transition rule can be summarized as:
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 start <- c(1,2,3,4,5,6)
@@ -554,7 +555,7 @@ We will suppose a Poisson distribution, this insured has the following *a priori
 
 ## Heterogeneity
 
-For simplicity, we will suppose two kinds of drivers, meaning the following distribution for $\Theta$:
+For simplicity, we will still suppose $N_i|\Theta=\theta \sim Poisson(\lambda_i \theta)$, but $\Theta$ will represent two kinds of drivers:
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 s0 <- c(0.667, 0.333)
@@ -799,7 +800,9 @@ knitr::kable(table1, format = "html", align = "cccccc", row.names=T, table.attr 
 
 # Computation of relativities
 
-The results can be generalized with continuous heterogeneity, where it can be shown that BMS relativities are computed using:
+The results can be generalized with continuous heterogeneity, when $\Theta \sim gamma(\alpha, \alpha)$, for example.
+
+In those cases, it can be shown that BMS relativities are computed using:
 
 $$r_{\ell} = \frac{ \int_0^{\infty} \theta  \Pi_{\ell}(\lambda \theta) g(\theta) d\theta }
 {\int_0^{\infty} \Pi_{\ell}(\lambda \theta) g(\theta) d\theta} \ \ \  \text{, for } \ell = 1,...,\ell_{max}.$$
@@ -807,6 +810,7 @@ $$r_{\ell} = \frac{ \int_0^{\infty} \theta  \Pi_{\ell}(\lambda \theta) g(\theta)
 where: 
 
 - $g(\theta)$ is the prior heterogeneity distribution;   
+
 - $\Pi_{\ell}(\lambda \theta)$ is the $\ell$ line component of $\Pi(\lambda \theta)$, the stationary distribution of insured of mean $\lambda \theta$.
 
 ---
@@ -877,10 +881,10 @@ class: inverse
 
 # Actual insurance database 
 
-Insureds (or even vehicles) are observed over time.  Here, the dataframe *df2.Rda* contains 25,078 vehicles each observed for 5 years.
+Insureds (or even vehicles) are observed over time.  Here, the dataframe *df2.Rda* contains 25,078 vehicles, each observed for 5 years.
 
 ```{r, echo=FALSE, warning=FALSE}
-knitr::kable(head(df2), format = "html", table.attr = "style='width:95%;'") %>% scroll_box(width = "100%")
+knitr::kable(head(df2[,1:25]), format = "html", table.attr = "style='width:95%;'") %>% scroll_box(width = "100%")
 ```
 
 ---
@@ -895,9 +899,9 @@ background-size: 20%
 
 ### Families of models
 
-We have to suppose a form of dependance between all contracts of the same insured/vehicle. 
+We have to suppose a form of dependance between all contracts of the same insured/vehicle. This form of data is called panel data, or longitudinal data.
 
-For count distributions, panel data modeling admits 3 families (see Molenberghs & Verbeke, 2005):
+For count distributions, panel data modeling admits 3 different families (see Molenberghs & Verbeke, 2005):
 
 - Transition models (for example: Time series for count data);    
 - Marginal approach (for example: Generalized Estimating Equations - GEE);  
@@ -929,7 +933,7 @@ $$\Pr[N_{i,1}=n_{i,1},...,N_{i,T}=n_{i,T}] = \left(\prod_{t=1}^{T} \frac{(\lambd
 
 ## Packages to use 
 
-To our knowledge, a R package to estimate the MVNB distribution does not exist. An old package *multinbmod* worked in the past.
+To our knowledge, a R package to estimate the MVNB distribution does not exist. An old package *multinbmod* worked in the past but has not been updated recently.
 
 Instead, a simpler solution is to simply write down the log-likelihood of the MVNB in a function (here *max.loglike.MVNB*) and use the *optim* or the *optimx* solver:
 
@@ -937,7 +941,7 @@ Instead, a simpler solution is to simply write down the log-likelihood of the MV
 
 max.loglike.MVNB <- function(parm){
   ...
-  return(loglike)
+  return(-loglike)
 }
 parm <- rep(0,9)
 optim.MVNB <- optim(par = parm, max.loglike.MVNB)
@@ -1037,7 +1041,7 @@ knitr::kable(table, format = "html", align = "ccccc",  digits = c(4,4), table.at
 
 # Posterior ratemaking
 
-As for cross-section data, we are interested to compute the predictive premium. The predictive premium of an insured with $\sum_{t=1}^{T-1} n_{i,t}$ past claims, and $\sum_{t=1}^{T-1} \lambda_{i,t}$ as the sum of past *a priori* premiums, is equal to:
+As for cross-section data, we are interested to compute the predictive premiums. The predictive premium of an insured with is equal to:
 
 $$E[N_{i,T}|n_{i,1},..., n_{i,T-1}, \boldsymbol{X}_{i,T}] = \lambda_{i,T} \frac{\alpha + \sum_{t=1}^{T-1} n_{i,t}}{\alpha + \sum_{t=1}^{T-1} \lambda_{i,t}}.$$
 
@@ -1054,7 +1058,7 @@ As before, by knowing that the random effects $\Theta$ are gamma distributed, th
 
 # Predictive distribution
 
-Even if the situation is similar, cross-section data and panel data models are not the same. 
+Even if the situation seems similar, cross-section data and panel data models are not the same. 
 
 ## Joint distribution
 
@@ -1062,11 +1066,11 @@ The joint distribution for all the contracts of the same insured can be rewritte
 
 $$\Pr[N_{i,1}=n_{i,1},...,N_{i,T}=n_{i,T}] = \Pr[N_{i,1}=n_{i,1}] \times \Pr[N_{i,2}=n_{i,2}|n_{i,1}] \times \ldots \times \Pr[N_{i,T}=n_{i,T}|n_{i,1}, \ldots, n_{i,T-1}]$$
 
-That means that the distribution the predictive distribution $\Pr[N_{i,t}=n_{i,t}|n_{i,1}, \ldots, n_{i,t-1}]$ is already used in the modeling and thus, a predictive premium is already computed in the underlying model.
+That means that the distribution the predictive distribution $\Pr[N_{i,t}=n_{i,t}|n_{i,1}, \ldots, n_{i,t-1}]$ is already used in the modeling and thus, a predictive premium is already computed in the underlying MVNB model.
 
 ## Assumption
 
-We do not need to only rely on the assumption of the constant heterogeneity term to ccompute the predictive premium (even more for large longitudinal dataset - as for the farm insurance dataset used in the published papers).
+For panel data, we do not need to rely on the assumption of the constant heterogeneity term to compute the predictive premium.
 
 ---
 
@@ -1102,20 +1106,25 @@ ggplot(somm1, aes(as.factor(contract.no), as.factor(past.nbclaim), fill= as.nume
 
 # Bonus-Malus scales
 
-BMS are still interesting for actuaries and insurers:
+Despite everything, BMS are still interesting for actuaries and insurers:
 
-- Advanced panel data models based on random effects, hierachical copulas, etc. cannot be easily used for ratemaking in practice;  
+- Advanced panel data models based on random effects, hierachical copulas, etc. cannot be easily used for ratemaking in practice; 
+
 - The penalty structure of BMS are well-known by many insurers, brokers, regulators and insureds, and easy to explain/understand;
+
 - BMS allow complex penalty structure that might be difficult to implement with classic statistical models:  
-  - Fast-track for forgiveness (ex: for example: 3-5 years without claim automatically gives the largest discount);  
-  - Multi-vehicules penalty structure;  
-  - Multi-products penalty structure;  
-  - etc.  
+  + Fast-track for forgiveness (ex: for example: 3-5 years without claim automatically gives the largest discount);  
+  + Multi-vehicules penalty structure;  
+  + Multi-products penalty structure;  
+  + etc.  
+
 - There is a large scientific literature on BMS that can be used.
 
 ---
 
-# The challenge with BMS
+# The actual challenge with BMS
+
+## Estimating the BMS 
 
 The problem is not on the BMS itself, but on how BMS can now be estimated with the current longitudinal/hierarchical data of 
 insurers:
@@ -1123,7 +1132,7 @@ insurers:
   - BMS relativities have to be estimated directly with the data;
   - A direct comparison between BMS premiums and data can be done.
 
-Boucher & Inoussa (2014) were the first to be interested in adapting the Bonus-Malus Scales approach to the new databases of insurers.
+## Linking with basic GLM models
 
 In the following slides, a link between the classic GLM approach and the BMS is proposed to better understand how actuaries can estimated all the BMS parameters.
 
@@ -1133,24 +1142,26 @@ In the following slides, a link between the classic GLM approach and the BMS is 
 
 Instead of using the bayesian approach, with an unknown risk profile that be updated after each contract, many insurers directly include past claims information as covariate in the $\mu$ mean parameter of the count distribution.  
 
-For example, for an insured with $T$ years of experience, some actuaries use:
+For example, for an insured $i$ with $T-1$ years of experience, some actuaries use:
 	
-$$\mu_{i,T}= \exp\left(X_{i,T}' \beta + \gamma_1 n_{i, T-1} + \gamma_2 n_{i, T-2} + ... +\gamma_1 n_{i, 1}\right)$$
+$$\mu_{i,T}= \exp\left(X_{i,T}' \beta + \gamma_{T-1} n_{i, T-1} + \gamma_2 n_{i, T-2} + ... +\gamma_1 n_{i, 1}\right),$$
+where $\gamma_{1}, \ldots, \gamma_{T-1}$ can be estimated by ML, like the other $\beta$ parameters.
 
 ## Sum of past claims
 	
-This means a large amount of parameters $\gamma_1, \ldots, \gamma_a$.  (One of) the purpose of statistics is to summarize information.
-One classic approach is instead to use a summary of past claims.  For example, we can use:
+This means that a large amount of parameters $\gamma_1, \ldots, \gamma_{T-1}$ must be estimated.  (One of) the purpose of statistic is to summarize information, so one classic approach is to use a summary of past claims.  For example, we can use:
 
-$$\mu_{i,t}= \exp(X_{i,t}' \beta + \gamma n_{i, \bullet})$$
+$$\mu_{i,T}= \exp(X_{i,T}' \beta + \gamma n_{i, \bullet})$$
 
-where $n_{i, \bullet}$ is the number of all past claims for insured $i$. 
+where $n_{i, \bullet} = \sum_{t=1}^{T-1} n_{i, t}$ is the number of all past claims for insured $i$. 
 
 ---
 
 # New insureds and insureds with experience
 
-The problem with the last approach is that we cannot differentiate new insureds from insureds with many years of experience: both types of insureds have $n_{i, \bullet} = 0$. Instead, we should use:
+The problem with the last approach is that it cannot differentiate new insureds from insureds with many years of experience: both types of insureds have $n_{i, \bullet} = 0$. 
+
+Instead, we should use:
 
 $$\mu_{i,T}= \exp(\boldsymbol{X}_{i,T}' \beta + \gamma_1 \kappa_{i, \bullet} + \gamma_2 n_{i, \bullet})$$
 	
@@ -1158,17 +1169,29 @@ where, for insured $i$:
 - $n_{i, \bullet} = \sum_{t=1}^{T-1} n_{i,t}$ is the number of all past claims;    
 - $\kappa_{i, \bullet} = \sum_{t=1}^{T-1} I(n_{i,t}=0)$ is the sum of policy periods without claims.  
 
-This allows us to differentiate new insureds from insureds with many years of experience.  
+This allows us to differentiate new insureds from experienced insureds without claims.  
 	
 This model is called the **Kappa-N model**.
 
 ---
 
+# Adding the past claim experience 
+
+The information can be computed in the dataframe:
+
+```{r, echo=FALSE, warning=FALSE}
+knitr::kable(head(df2[,c(1:3, 23, 26:35)]), format = "html", table.attr = "style='width:95%;'") %>% scroll_box(width = "100%")
+```
+
+---
+
 # Fitting the Kappa-N model 
 
-The Kappa-N model can be used with any distribution.  The Poisson Kappa-N and the NB2 Kappa-N are presented below:
+The Kappa-N model only specifies the form of the mean and can be used with any distribution.  
 
-## Add past information
+The Poisson Kappa-N and the NB2 Kappa-N are presented below:
+
+### Add past information
 
 ```{r, eval=TRUE}
 data <- df2 %>%
@@ -1181,7 +1204,7 @@ data <- df2 %>%
   ungroup()
 ```
 
-## Split data 
+### Split data 
 
 ```{r, eval=TRUE}
 
@@ -1207,13 +1230,15 @@ nb2.MASS <- glm.nb(score.nbclaim, data=db.train)
 
 # Poisson Kappa-N and NB2 Kappa-N models 
 
+## Estimated parameters 
+
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 parm <- Poisson$coefficients
 parm[11] <- NA
 MASS.parm <- c(nb2.MASS$coefficients, nb2.MASS$theta)
 table <- cbind(parm, MASS.parm)
-colnames(table)[1] <- 'Poisson'
-colnames(table)[2] <- 'NB2'
+colnames(table)[1] <- 'Poisson Kappa-N'
+colnames(table)[2] <- 'NB2 Kappa-N'
 rownames(table)[11] <- '$\\alpha$'
 knitr::kable(table, format = "html", align = "ccccc",  digits = c(4,4), table.attr = "style='width:95%;'", format.args = list(big.mark = ",")) 
 ```
@@ -1226,19 +1251,19 @@ The mean parameter of the Poisson and the NB2 distribution was defined as:
 	
 $$\lambda_{i,t}= \exp(X_{i,t}' \beta + \gamma_1 \kappa_{i, \bullet} + \gamma_2 n_{i, \bullet})$$
 
-## Results for the fictive car insurance dataset:
+## Results for the dataset of this presentation:
 
 For the Poisson distribution, we obtained:
 
-- $\widehat{\gamma}_1$ = $0.1976$;   
-- $\widehat{\gamma}_2$ = $-0.1101$.
+- $\widehat{\gamma}_1$ = $-0.1101$.
+- $\widehat{\gamma}_2$ = $0.1976$;
 
 ## Results for the Farm dataset (in the published papers):
 
 For the Poisson distribution, we obtained:
 
-- $\widehat{\gamma}_1$ = $0.0935$;   
-- $\widehat{\gamma}_2$ = $-0.0238$.  
+- $\widehat{\gamma}_1$ = $-0.0238$.  
+- $\widehat{\gamma}_2$ = $0.0935$;   
 
 ---
 
@@ -1268,15 +1293,17 @@ With the mean parameter:
 
 $$\lambda_{i,t} = \exp\left(\boldsymbol{X}_{i,t}' \beta^* + \gamma_1 \ell_{i,t} \right) \text{, where } \ell_{i,t} = \left(100 -\kappa_{i, \bullet} + \frac{\gamma_2}{\gamma_1} n_{i, \bullet} \right)$$
 
-## Details 
+## Impact of past claims
 
-1) For new insured, without insured experience, we have $n_{i, \bullet} = 0$, and $\kappa_{i, \bullet} = 0$, which means an initial claim score of 100.  
+The Poisson Kappa-N model that we just estimated can then be analyzed as follow:
+
+1) For new insured, without insured experience, we have $n_{i, \bullet} = 0$, and $\kappa_{i, \bullet} = 0$, which means an initial claim score $\ell_{i,1}$ of 100.  
   
-2) Each year without claim decrease his claim score by 1.  
+2) Each year without claim decrease the claim score by 1.  
 
 3) Each claim increases the claim score by $\Psi = \frac{\widehat{\gamma_2}}{\widehat{\gamma_1}} = 3.93$, called the *jump-parameter*:  
   - One claim equals $\approx \Psi$ years without claims;
-  - $\Psi = \frac{0.1976}{0.1101} = 1.79$ for the fictive car insurance dataset.
+  - $\Psi = \frac{\gamma_2}{\gamma_1}= \frac{0.1976}{0.1101} = 1.79$ for the fictive car insurance dataset.
 
 ---
 
@@ -1286,20 +1313,22 @@ With the mean parameter:
 
 $$\lambda_{i,t} = \exp\left(\boldsymbol{X}_{i,t}' \beta^* + \gamma_1 \ell_{i,t} \right) \text{, where } \ell_{i,t} = \left(100 -\kappa_{i, \bullet} + \frac{\gamma_2}{\gamma_1} n_{i, \bullet} \right)$$
 
-## Details 
+## Impact of past claims
 
 4) The penalty for a claim is equal to:
-  - $\exp(0.1101 \times 1.79) - 1  = 21.78\%$ for the fictive car insurance dataset.
+  - $\exp(0.1101 \times 1.79) - 1  = 21.78\%$..
 
 5) Each year without claim decreases the premium by:
-  - $1 - \exp(-0.1101) = 10.4\%$ for the fictive car insurance dataset.	
+  - $1 - \exp(-0.1101) = 10.4\%$.	
 
 ---
 
 
 # Problem of the Kappa-N models
 
-One obvious problem with the Kappa-N models is the possible extreme values of $\ell_{i,t}$.  For the fictive dataset, we have: 
+One obvious problem with the Kappa-N models is the possible extreme values of $\ell_{i,t}$.  
+
+For the fictive dataset, we have: 
 
 1) Maximum value of $n_{i, \bullet}$: 8.    
 
@@ -1335,7 +1364,7 @@ Instead of:
 
 ## Simple illustration 
 
-What happens to the claim score with a jump parameter $\Psi=3$.
+To better understand, we analyze three insureds for a model with a jump parameter $\Psi=3$. We want to estimate the premium of all three insureds at time $T=11$.
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 s0 <- c(0,0,0,0,0,0,0,0,0,0)
@@ -1670,7 +1699,9 @@ We repeat these steps until we reach convergence.
 
 ---
 
-# Results obtained with the fictive dataset (Poisson)
+# Fitting the BMS (Poisson distribution)
+
+## Estimated parameters
 
 ```{r, eval=TRUE, cache=TRUE, echo=FALSE}
 score.nbclaim <- as.formula(NbClaims ~ car_color + need_glasses + territory + language + food + offset(log(risk_expo)))
@@ -2127,7 +2158,9 @@ knitr::include_graphics("images/MeanLevel.png")
 
 # Partitioning the portfolio
 
-A proposed solution to deal with farms of different sizes was to divide the portfolio into groups.  Groups of farms of similar sizes could be created, and each group would have their own experience-rating model, with its own *a priori* rating parameters and its own structural BMS parameters. 
+A proposed solution to deal with farms of different sizes was to divide the portfolio into groups.  
+
+Groups of farms of similar sizes could be created, and each group would have their own experience-rating model, with its own *a priori* rating parameters and its own structural BMS parameters. 
 
 Farms could then be more equitably rated, and more correctly rewarded and penalized, as their size would be directly taken into account when performing past claims rating.
 
