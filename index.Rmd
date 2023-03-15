@@ -393,7 +393,7 @@ knitr::kable(table, format = "html", align = "ccccc",  digits = c(4,4), table.at
 
 # Prediction quality on the test set
 
-Even if it is not the objective of this presentation, we can compare the fit and the prediction quality of the Poisson and the Negative Binomial 2.  For the training set, the loglikelihood is used and a logarithmic score ($LS$) is used on the test set:
+Even if it is not the objective of this presentation, we can compare the fit and the prediction quality of the Poisson and the Negative Binomial 2.  For the training set, the loglikelihood is used and a logarithmic score (LS) is used on the test set:
 
 $$LS = - \sum_{i=1}^m \log(\Pr(N_i=n_i|\boldsymbol{X}_i))$$
 
@@ -439,7 +439,7 @@ knitr::kable(table, format = "html", align = "ccccc",  digits = c(4,4), table.at
 
 ## Distribution of the heterogeneity
 
-Based on the baysian model, by fitting a Negative Binomial distribution (NB2) on claim counts data, we know that the heterogeneity of our portfolio $\Theta$ is following a gamma( $\alpha = 2.1244$, $\tau = \alpha = 2.1244$).
+Based on the bayesian model, by fitting a Negative Binomial distribution (NB2) on claim counts data, we know that the heterogeneity of our portfolio $\Theta$ is following a gamma( $\alpha = 2.1244$, $\tau = \alpha = 2.1244$).
 
 ## Predictive premiums
 
@@ -1046,7 +1046,7 @@ As for cross-section data, we are interested to compute the predictive premiums.
 $$E[N_{i,T}|n_{i,1},..., n_{i,T-1}, \boldsymbol{X}_{i,T}] = \lambda_{i,T} \frac{\alpha + \sum_{t=1}^{T-1} n_{i,t}}{\alpha + \sum_{t=1}^{T-1} \lambda_{i,t}}.$$
 
 This result is similar to what we obtained for the predictive premium of a NB2 distribution but the estimated value of the 
-$\alpha$ is not the same ($\widehat{\beta}$ are also different).
+$\alpha$ is not the same (estimates of $\beta$ are also different).
 
 ## Same problems 
 
@@ -1159,7 +1159,7 @@ where $n_{i, \bullet} = \sum_{t=1}^{T-1} n_{i, t}$ is the number of all past cla
 
 # New insureds and insureds with experience
 
-The problem with the last approach is that it cannot differentiate new insureds from insureds with many years of experience: both types of insureds have $n_{i, \bullet} = 0$. 
+The problem with the last approach is that it cannot differentiate new insureds from experience insureds without claim: both types of insureds have $n_{i, \bullet} = 0$. 
 
 Instead, we should use:
 
@@ -1301,9 +1301,8 @@ The Poisson Kappa-N model that we just estimated can then be analyzed as follow:
   
 2) Each year without claim decrease the claim score by 1.  
 
-3) Each claim increases the claim score by $\Psi = \frac{\widehat{\gamma_2}}{\widehat{\gamma_1}} = 3.93$, called the *jump-parameter*:  
-  - One claim equals $\approx \Psi$ years without claims;
-  - $\Psi = \frac{\gamma_2}{\gamma_1}= \frac{0.1976}{0.1101} = 1.79$ for the fictive car insurance dataset.
+3) Each claim increases the claim score by $\Psi = \frac{\widehat{\gamma_2}}{\widehat{\gamma_1}} = \frac{0.1976}{0.1101} = 1.79$, called the *jump-parameter*:  
+  - One claim equals $\approx \Psi$ years without claims.
 
 ---
 
@@ -1316,10 +1315,10 @@ $$\lambda_{i,t} = \exp\left(\boldsymbol{X}_{i,t}' \beta^* + \gamma_1 \ell_{i,t} 
 ## Impact of past claims
 
 4) The penalty for a claim is equal to:
-  - $\exp(0.1101 \times 1.79) - 1  = 21.78\%$..
+  - $\exp(\gamma_1 \times \Psi) - 1 = \exp(0.1101 \times 1.79) - 1  = 21.78\%$..
 
 5) Each year without claim decreases the premium by:
-  - $1 - \exp(-0.1101) = 10.4\%$.	
+  - $1 - \exp(-\gamma_1) = 1 - \exp(-0.1101) = 10.4\%$.	
 
 ---
 
